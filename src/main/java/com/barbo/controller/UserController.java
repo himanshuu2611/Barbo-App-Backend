@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "https://barbo-app-frontend-salf.vercel.app") // ✅ frontend access
+@CrossOrigin(origins = "https://barbo-app-frontend.vercel.app") // ✅ frontend access
 public class UserController {
 
     private final UserService userService;
