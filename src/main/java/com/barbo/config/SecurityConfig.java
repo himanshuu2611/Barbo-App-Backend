@@ -18,54 +18,30 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private CorsConfigurationSource corsConfigurationSource;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+   @Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
 
-        http
-                .csrf(csrf -> csrf.disable())
+        // ✅ ENABLE CORS PROPERLY
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // ✅ CORS
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .authorizeHttpRequests(auth -> auth
 
-                // ✅ Stateless JWT
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+            // ✅ allow preflight
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // 🔐 ROLE-BASED AUTHORIZATION
-                .authorizeHttpRequests(auth -> auth
+            // ✅ public
+            .requestMatchers("/users/login", "/users").permitAll()
 
-                        // ✅ Public APIs
-                        .requestMatchers("/users/login", "/users").permitAll()
+            // ✅ rest
+            .anyRequest().authenticated()
+        );
 
-                        // ✅ Swagger (optional)
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
-
-                        // ✅ Allow preflight requests
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // 👨‍💼 ADMIN ONLY
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                        // 👤 USER ONLY
-                        .requestMatchers("/user/**").hasRole("USER")
-
-                        // 🔓 Common
-                        .requestMatchers("/barbers/**", "/services/**").authenticated()
-
-                        .anyRequest().authenticated()
-                )
-
-                // ✅ JWT Filter
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
+    return http.build();
+}
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
