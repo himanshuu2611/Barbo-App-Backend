@@ -10,7 +10,7 @@ import org.springframework.security.web.*;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.*;
-
+import org.springframework.http.HttpMethod;
 import java.util.List;
 
 @Configuration
