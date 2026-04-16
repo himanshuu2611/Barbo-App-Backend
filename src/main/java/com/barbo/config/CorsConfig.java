@@ -10,18 +10,15 @@ import java.util.List;
 public class CorsConfig {
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowedOrigins(List.of("https://barbo-app-frontend.vercel.app/"));
+    config.setAllowedMethods(List.of("*"));
+    config.setAllowedHeaders(List.of("*"));
 
-        CorsConfiguration config = new CorsConfiguration();
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
 
-        config.setAllowedOrigins(List.of("https://barbo-app-frontend.vercel.app"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return source;
-    }
+    return source;
+}
 }
