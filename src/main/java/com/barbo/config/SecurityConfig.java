@@ -52,7 +52,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(List.of("https://barbo-app-frontend.vercel.app"));
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
