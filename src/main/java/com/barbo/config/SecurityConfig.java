@@ -20,28 +20,54 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private CorsConfigurationSource corsConfigurationSource;
 
-   @Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        // ✅ ENABLE CORS PROPERLY
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        http
+                .csrf(csrf -> csrf.disable())
 
-        .authorizeHttpRequests(auth -> auth
+                // ✅ CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-            // ✅ allow preflight
-            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // ✅ Stateless JWT
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
 
-            // ✅ public
-            .requestMatchers("/users/login", "/users").permitAll()
+                // 🔐 ROLE-BASED AUTHORIZATION
+                .authorizeHttpRequests(auth -> auth
 
-            // ✅ rest
-            .anyRequest().authenticated()
-        );
+                        // ✅ Public APIs
+                        .requestMatchers("/users/login", "/users").permitAll()
 
-    return http.build();
-}
+                        // ✅ Swagger (optional)
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
+                        // ✅ Allow preflight requests
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // 👨‍💼 ADMIN ONLY
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                        // 👤 USER ONLY
+                        .requestMatchers("/user/**").hasRole("USER")
+
+                        // 🔓 Common
+                        .requestMatchers("/barbers/**", "/services/**").authenticated()
+
+                        .anyRequest().authenticated()
+                )
+
+                // ✅ JWT Filter
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+    
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
